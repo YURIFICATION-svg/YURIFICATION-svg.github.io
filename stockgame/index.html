@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>김정훈 게임</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@300;400;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="styles.css" rel="stylesheet">
+</head>
+
+<body>
+
+<!-- ══════════════════════════════════════════
+     로그인 / 회원가입 화면
+══════════════════════════════════════════ -->
+<div id="authScreen" class="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">KIM JEONG HOON<span class="logo-live">LIVE</span></div>
+    <div class="auth-subtitle">REAL STOCKEX TRADING SIMULATOR</div>
+
+    <!-- 탭 -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin"    onclick="switchTab('login')">로그인</button>
+      <button class="auth-tab"        id="tabRegister" onclick="switchTab('register')">회원가입</button>
+    </div>
+
+    <!-- 로그인 폼 -->
+    <div id="formLogin">
+      <label class="field-lbl">아이디</label>
+      <input class="field-input" id="loginUser" type="text"     placeholder="username" autocomplete="username">
+      <label class="field-lbl" style="margin-top:14px;">비밀번호</label>
+      <input class="field-input" id="loginPass" type="password" placeholder="password" autocomplete="current-password">
+      <div class="auth-error" id="loginErr"></div>
+      <button class="auth-submit-btn" onclick="doLogin()">로그인</button>
+    </div>
+
+    <!-- 회원가입 폼 -->
+    <div id="formRegister" style="display:none;">
+      <label class="field-lbl">아이디</label>
+      <input class="field-input" id="regUser" type="text"     placeholder="username (4자 이상)" autocomplete="username">
+      <label class="field-lbl" style="margin-top:14px;">비밀번호</label>
+      <input class="field-input" id="regPass" type="password" placeholder="password (4자 이상)"  autocomplete="new-password">
+      <div class="auth-error" id="regErr"></div>
+      <button class="auth-submit-btn" onclick="doRegister()">계정 만들기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     메인 게임 화면
+══════════════════════════════════════════ -->
+<div id="gameScreen" style="display:none;">
+
+<header>
+  <div class="logo">
+    KIM JEONG HOON
+    <span class="logo-live">LIVE</span>
+  </div>
+  <div class="header-mid">
+    <div class="refresh-status">
+      <div class="dot" id="statusDot"></div>
+      <span id="statusText">가격 로딩 중...</span>
+    </div>
+    &nbsp;·&nbsp;
+    <span id="nextUpdate">—</span>
+  </div>
+  <div class="header-right" style="display:flex;align-items:center;gap:20px;">
+    <div class="budget-block">
+      <div class="budget-label">현금 잔액</div>
+      <div class="budget-value" id="headerBudget">$10,000.00</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;">접속 중</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--accent);" id="headerUser">—</div>
+    </div>
+    <button onclick="doLogout()" style="background:transparent;border:1px solid var(--border);color:var(--text-muted);font-family:'Share Tech Mono',monospace;font-size:10px;padding:6px 12px;cursor:pointer;letter-spacing:1px;" onmouseover="this.style.borderColor='var(--danger)';this.style.color='var(--danger)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">로그아웃</button>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- LEFT: table -->
+  <div class="left-col">
+    <div class="stats-row">
+      <div class="stat-cell green">
+        <div class="stat-lbl">현금</div>
+        <div class="stat-val" id="statCash">$10,000</div>
+      </div>
+      <div class="stat-cell blue">
+        <div class="stat-lbl">주식 평가액</div>
+        <div class="stat-val" id="statAsset">$0</div>
+      </div>
+      <div class="stat-cell yellow">
+        <div class="stat-lbl">총 자산</div>
+        <div class="stat-val" id="statTotal">$10,000</div>
+      </div>
+      <div class="stat-cell red">
+        <div class="stat-lbl">손익</div>
+        <div class="stat-val" id="statPnL">$0.00</div>
+      </div>
+    </div>
+
+    <div class="table-area">
+      <table>
+        <thead>
+          <tr>
+            <th>종목</th>
+            <th class="r">현재가 (USD)</th>
+            <th class="r">등락</th>
+            <th class="r">보유</th>
+            <th class="r">평가액</th>
+          </tr>
+        </thead>
+        <tbody id="stockTable">
+          <tr class="loading-row">
+            <td colspan="5"><span class="spinner"></span>실시간 가격 불러오는 중...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- RIGHT: trade panel -->
+  <div class="right-col">
+    <div class="panel-section">
+      <div class="panel-title">— 선택 종목</div>
+      <div class="selected-info" id="selectedInfo">
+        <div style="color:var(--text-muted);font-size:12px;font-family:'Share Tech Mono',monospace;padding:10px 0;">
+          테이블에서 종목을 선택하세요
+        </div>
+      </div>
+      <label class="field-lbl">수량 (주)</label>
+      <input class="field-input" type="number" id="inputQty" min="1" value="1" placeholder="0">
+      <div class="cost-preview" id="costPreview">&nbsp;</div>
+      <div class="btn-row">
+        <button class="trade-btn buy-btn"  onclick="buy()">매수</button>
+        <button class="trade-btn sell-btn" onclick="sell()">매도</button>
+      </div>
+    </div>
+
+    <div class="panel-section" id="holdingsPanel" style="display:none">
+      <div class="panel-title">— 보유 종목</div>
+      <div class="holding-list" id="holdingList"></div>
+    </div>
+
+    <div class="panel-section" style="padding-bottom:0;border-bottom:none;">
+      <div class="panel-title">— 거래 기록</div>
+    </div>
+    <div class="log-area">
+      <div class="log-inner" id="tradeLog"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /gameScreen -->
+
+<!-- Chart Modal -->
+<div id="chartModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(8px);" onclick="closeChart(event)">
+  <div style="background:#0d1017;border:1px solid #00e5ff33;padding:0;max-width:720px;width:95%;position:relative;max-height:90vh;overflow:hidden;" onclick="event.stopPropagation()">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid #181e2c;">
+      <div>
+        <span id="chartTicker" style="font-family:'Black Han Sans',sans-serif;font-size:22px;color:#00e5ff;letter-spacing:3px;"></span>
+        <span id="chartName"   style="font-size:12px;color:#4a5568;font-family:'Share Tech Mono',monospace;margin-left:12px;"></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div id="chartSummary" style="font-family:'Share Tech Mono',monospace;font-size:12px;text-align:right;"></div>
+        <button onclick="closeChart()" style="background:transparent;border:1px solid #181e2c;color:#4a5568;font-size:16px;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;" onmouseover="this.style.borderColor='#ff3b5c';this.style.color='#ff3b5c'" onmouseout="this.style.borderColor='#181e2c';this.style.color='#4a5568'">✕</button>
+      </div>
+    </div>
+    <div style="padding:24px 24px 16px;">
+      <div id="chartLoading" style="text-align:center;padding:60px;font-family:'Share Tech Mono',monospace;font-size:12px;color:#4a5568;letter-spacing:2px;">
+        <div style="display:inline-block;width:20px;height:20px;border:2px solid #181e2c;border-top-color:#00e5ff;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:12px;"></div><br>
+        주간 데이터 로딩 중...
+      </div>
+      <canvas id="chartCanvas" width="672" height="300" style="display:none;width:100%;height:300px;"></canvas>
+    </div>
+    <div id="chartStats" style="display:none;padding:0 24px 20px;">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+        <div class="cstat"><div class="cstat-lbl">시작가</div><div class="cstat-val" id="cs-open">—</div></div>
+        <div class="cstat"><div class="cstat-lbl">현재가</div><div class="cstat-val" id="cs-cur">—</div></div>
+        <div class="cstat"><div class="cstat-lbl">주간 고가</div><div class="cstat-val" id="cs-high" style="color:var(--accent2)">—</div></div>
+        <div class="cstat"><div class="cstat-lbl">주간 저가</div><div class="cstat-val" id="cs-low" style="color:var(--danger)">—</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="script.js"></script>
+</body>
+</html>
