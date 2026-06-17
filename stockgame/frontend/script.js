@@ -12,7 +12,7 @@ const REFRESH_INTERVAL = 60000; // 60초
 const INITIAL_BUDGET   = 10000;
 
 // ⚠️  API 키는 모두 서버로 이동했습니다. 여기엔 백엔드 주소만 설정하세요.
-const API_BASE = 'https://yurification-svggithubio-production.up.railway.app/';   // 배포 시 실제 서버 주소로 변경
+const API_BASE = 'https://yurification-svggithubio-production.up.railway.app';   // 배포 시 실제 서버 주소로 변경
 
 /* ─────────────────────────────────────────────
    AUTH STATE
