@@ -23,9 +23,9 @@ import models
 models.Base.metadata.create_all(bind=engine)
 
 # ── 환경 변수 ───────────────────────────────────────────────
-SECRET_KEY     = os.getenv("SECRET_KEY",    "change-this-in-production-very-long-secret")
-FINNHUB_KEY    = os.getenv("FINNHUB_KEY",   "d8jc4u9r01qh6g3pfl6gd8jc4u9r01qh6g3pfl70")
-TD_KEY         = os.getenv("TD_KEY",        "3244dc0f77c842b9a2761b3bda69ef3e")
+SECRET_KEY     = os.getenv("SECRET_KEY")
+FINNHUB_KEY    = os.getenv("FINNHUB_KEY")
+TD_KEY         = os.getenv("TD_KEY")
 ALGORITHM      = "HS256"
 TOKEN_EXPIRE_H = 72   # 토큰 유효 시간 (시간)
 
